@@ -20,7 +20,7 @@ namespace Sokoban
         int player = 3;
         int target = 4;
 
-
+        //comment
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
