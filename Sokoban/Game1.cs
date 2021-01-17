@@ -184,6 +184,7 @@ namespace Sokoban
                 {
                     if (gameboard[level, y, x] > 0)
                     {
+                        //win message
                         if(gameboard[level, (int)(boxPos.Y / 50), (int)(boxPos.X / 50)] == target)
                         {
                             SpriteFont font;
