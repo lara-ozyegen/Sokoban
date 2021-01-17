@@ -21,12 +21,17 @@ namespace Sokoban
         int wall = 2;
         int player = 3;
         int target = 4;
+        bool isLeftPressed = false;
+        bool isRightPressed = false;
+        bool isUpPressed = false;
+        bool isDownPressed = false;
+
 
         const string winMessage = "WIN!";
         const string gameOverMessage = "GAME OVER!";
 
 
-        //comment
+     
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -36,7 +41,7 @@ namespace Sokoban
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+           
             if(level == 0)
             {
                 playerPos = new Vector2(50,50);
@@ -63,15 +68,15 @@ namespace Sokoban
             }
 
             gameboard[0, 1, 6] = target;
-            // TODO: use this.Content to load your game content here
+           
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
-                if (Keyboard.GetState().IsKeyDown(Keys.Left) && playerPos.X > 50 && gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall)
+           
+                if (Keyboard.GetState().IsKeyDown(Keys.Left) && playerPos.X > 50 && gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall && isLeftPressed == false)
                 {
                     if (boxPos.X == playerPos.X - 50 && boxPos.Y == playerPos.Y)
                     {
@@ -83,22 +88,41 @@ namespace Sokoban
                             playerPos.X = playerPos.X + 50;
                     }
                     playerPos.X = playerPos.X - 50;
-                }
-                if (Keyboard.GetState().IsKeyDown(Keys.Right) && playerPos.X < (width - 2) * 50 && gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall)
-                {
-                    if (boxPos.X == playerPos.X + 50 && boxPos.Y == playerPos.Y)
-                    {
-                        if (gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == space || gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == target)
-                        {
-                            boxPos.X = boxPos.X + 50;
-                        }
-                        else
-                            playerPos.X = playerPos.X - 50;
-                    }
-                    playerPos.X = playerPos.X + 50;
+                isLeftPressed = true;
                 }
 
-                if (Keyboard.GetState().IsKeyDown(Keys.Down) && playerPos.Y < (height - 2) * 50 && gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall)
+            if (Keyboard.GetState().IsKeyUp(Keys.Left))
+            {
+                if (isLeftPressed)
+                {
+                    isLeftPressed = false;
+                }
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Right) && playerPos.X < (width - 2) * 50 && gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall && isRightPressed == false)
+            {
+                if (boxPos.X == playerPos.X + 50 && boxPos.Y == playerPos.Y)
+                {
+                    if (gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == space || gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == target)
+                    {
+                        boxPos.X = boxPos.X + 50;
+                    }
+                    else
+                        playerPos.X = playerPos.X - 50;
+                }
+                playerPos.X = playerPos.X + 50;
+                isRightPressed = true;
+            }
+
+            if (Keyboard.GetState().IsKeyUp(Keys.Right))
+            {
+                if (isRightPressed)
+                {
+                    isRightPressed = false;
+                }
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Down) && playerPos.Y < (height - 2) * 50 && gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall && isDownPressed == false)
                 {
                     if (boxPos.Y == playerPos.Y + 50 && boxPos.X == playerPos.X)
                     {
@@ -110,9 +134,18 @@ namespace Sokoban
                             playerPos.Y = playerPos.Y - 50;
                     }
                     playerPos.Y = playerPos.Y + 50;
+                    isDownPressed = true;
                 }
 
-                if (Keyboard.GetState().IsKeyDown(Keys.Up) && playerPos.Y > 50 && gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall)
+            if (Keyboard.GetState().IsKeyUp(Keys.Down))
+            {
+                if (isDownPressed)
+                {
+                    isDownPressed = false;
+                }
+            }
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Up) && playerPos.Y > 50 && gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall && isUpPressed == false)
                 {
                     if (boxPos.Y == playerPos.Y - 50 && boxPos.X == playerPos.X)
                     {
@@ -124,9 +157,18 @@ namespace Sokoban
                             playerPos.Y = playerPos.Y + 50;
                     }
                     playerPos.Y = playerPos.Y - 50;
+                    isUpPressed = true;
                 }
 
-            // TODO: Add your update logic here
+            if (Keyboard.GetState().IsKeyUp(Keys.Up))
+            {
+                if (isUpPressed)
+                {
+                    isUpPressed = false;
+                }
+            }
+
+
             base.Update(gameTime);
         }
 
@@ -158,8 +200,6 @@ namespace Sokoban
             }
 
             _spriteBatch.End();
-
-            // TODO: Add your drawing code here
 
             base.Draw(gameTime);
         }
