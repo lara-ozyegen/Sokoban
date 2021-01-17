@@ -10,6 +10,22 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Content\193400__qubodup__oughahey.flac" />
+    <None Remove="Content\323417__sethroph__glass-slide-7.wav" />
+    <None Remove="Content\397353__plasterbrain__tada-fanfare-g.flac" />
+    <None Remove="Content\415075__kyle-carpio__footstep-boots-wood.wav" />
+    <None Remove="Content\43595__freqman__box-falls-2.wav" />
+    <None Remove="Content\482652__joao-janz__bonus-points-1-2.wav" />
+    <None Remove="Content\51746__erkanozan__clap.wav" />
+    <None Remove="Content\76376__deleted-user-877451__game-over.wav" />
+    <None Remove="Content\catGif.gif" />
+    <None Remove="Content\PlayerHitsWall1.flac" />
+    <None Remove="Content\PlayerHitsWall2.flac" />
+    <None Remove="Content\PlayerHitsWall3.flac" />
+    <None Remove="Content\PlayerHitsWall4.flac" />
+    <None Remove="Content\PlayerHitsWall5.flac" />
+    <None Remove="Content\PlayerHitsWall6.flac" />
+    <None Remove="Content\TaDa.flac" />
     <None Remove="Icon.ico" />
     <None Remove="Icon.bmp" />
   </ItemGroup>
