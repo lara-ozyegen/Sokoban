@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
-using System;
+
 
 namespace Sokoban
 {
@@ -15,6 +15,7 @@ namespace Sokoban
         Vector2 playerPos;
         Vector2 boxPos;
         Vector2 nextPos;
+        Vector2 nextPosBox;
         const int levelSize = 20;
         const int width = 8;
         const int height = 8;
@@ -52,6 +53,7 @@ namespace Sokoban
             {
                 playerPos = new Vector2(50,50);
                 nextPos = new Vector2(0,0);
+                nextPosBox = new Vector2(0, 0);
                 boxPos = new Vector2(50 * 3, 50 * 3);
             }
 
@@ -78,32 +80,59 @@ namespace Sokoban
 
             //Adding the sound effects
             sounds.Add(Content.Load<SoundEffect>("BoxHitsWall"));
-            //sounds.Add(Content.Load<SoundEffect>("BoxSlide"));
+            
             sounds.Add(Content.Load<SoundEffect>("WinClaps"));
             sounds.Add(Content.Load<SoundEffect>("Footsteps"));
             sounds.Add(Content.Load<SoundEffect>("OnTarget"));
-            sounds.Add(Content.Load<SoundEffect>("GameOver"));
+            //sounds.Add(Content.Load<SoundEffect>("GameOver"));
             sounds.Add(Content.Load<SoundEffect>("TaDa"));
-            sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall1"));
-            sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall2"));
+            //sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall1"));
+            //sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall2"));
             sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall3"));
-            sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall4"));
+            /*sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall4"));
             sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall5"));
-            sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall6"));
+            sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall6"));*/
+            sounds.Add(Content.Load<SoundEffect>("BoxSlide"));
 
         }
 
-        public void playSound(Vector2 nextPos)
+        public void playSound()
         {
-            if(gameboard[level, (int)nextPos.Y, (int)(nextPos.X)] == wall)
+            
+            //walk
+            if (gameboard[level, (int) (nextPos.Y / 50), (int)(nextPos.X / 50)] == space)
             {
-                Random rand = new Random();
-                int num = rand.Next(1, 7);
-                sounds[num+5].CreateInstance().Play();
+                sounds[2].CreateInstance().Play();
             }
-            if (gameboard[level, (int)nextPos.Y, (int)(nextPos.X)] == target)
+
+            //player hits the wall
+            if (gameboard[level, (int) (nextPos.Y / 50), (int) (nextPos.X / 50)] == wall)
             {
-                sounds[3].CreateInstance().Play();
+                //Random rand = new Random();
+                //int num = rand.Next(1, 7);
+                //sounds[num+5].CreateInstance().Play();
+                sounds[5].CreateInstance().Play();
+            }
+
+            if (nextPos.X == boxPos.X && nextPos.Y == boxPos.Y)
+            {
+                //player slides the box if it is possible for the box to slide in that direction
+                if (gameboard[level, (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50)] == space)
+                {
+                    sounds[6].CreateInstance().Play();
+                }
+
+                //box hits the wall
+                if (gameboard[level, (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50)] == wall)
+                {
+                    sounds[0].CreateInstance().Play();
+                }
+
+                //box is at the target
+                if (gameboard[level, (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50)] == target)
+                {
+                    sounds[3].CreateInstance().Play();
+                }
             }
         }
 
@@ -111,14 +140,21 @@ namespace Sokoban
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-           
-            if (Keyboard.GetState().IsKeyDown(Keys.Left) && isLeftPressed == false && playerPos.X > 50)
+
+            //left
+            if (Keyboard.GetState().IsKeyDown(Keys.Left) && isLeftPressed == false)
             {
-                if (gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall)
+                nextPos.X = playerPos.X  - 50;
+                nextPos.Y = playerPos.Y;
+                nextPosBox.X = boxPos.X - 50;
+                nextPosBox.Y = boxPos.Y;
+                playSound();
+
+                if (gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall && playerPos.X > 50)
                 {
                     if (boxPos.X == playerPos.X - 50 && boxPos.Y == playerPos.Y)
                     {
-                        if (gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) - 2] == space || gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) - 2] == target)
+                        if (gameboard[level, (int) (playerPos.Y / 50), (int) (playerPos.X / 50) - 2] == space || gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) - 2] == target)
                         {
                             boxPos.X = boxPos.X - 50;
                         }
@@ -127,7 +163,6 @@ namespace Sokoban
                     }
                     playerPos.X = playerPos.X - 50;
                     isLeftPressed = true;
-                    sounds[2].CreateInstance().Play();
                 }
             }
 
@@ -139,19 +174,30 @@ namespace Sokoban
                 }
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Right) && playerPos.X < (width - 2) * 50 && gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall && isRightPressed == false)
+            //right
+            if (Keyboard.GetState().IsKeyDown(Keys.Right) && isRightPressed == false)
             {
-                if (boxPos.X == playerPos.X + 50 && boxPos.Y == playerPos.Y)
+                nextPos.X = playerPos.X + 50;
+                nextPos.Y = playerPos.Y;
+                nextPosBox.X = boxPos.X + 50;
+                nextPosBox.Y = boxPos.Y;
+                playSound();
+
+                if (gameboard[level, (int)(playerPos.Y / 50), (int) (playerPos.X / 50)] != wall && playerPos.X < (width - 2) * 50)
                 {
-                    if (gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == space || gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == target)
+                    if (boxPos.X == playerPos.X + 50 && boxPos.Y == playerPos.Y)
                     {
-                        boxPos.X = boxPos.X + 50;
+                        if (gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == space || gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == target)
+                        {
+                            boxPos.X = boxPos.X + 50;
+                        }
+                        else
+                            playerPos.X = playerPos.X - 50;
                     }
-                    else
-                        playerPos.X = playerPos.X - 50;
+                    playerPos.X = playerPos.X + 50;
+                    isRightPressed = true;
                 }
-                playerPos.X = playerPos.X + 50;
-                isRightPressed = true;
+               
             }
 
             if (Keyboard.GetState().IsKeyUp(Keys.Right))
@@ -162,19 +208,29 @@ namespace Sokoban
                 }
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Down) && playerPos.Y < (height - 2) * 50 && gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall && isDownPressed == false)
+            //down
+            if (Keyboard.GetState().IsKeyDown(Keys.Down) &&  isDownPressed == false)
             {
-                if (boxPos.Y == playerPos.Y + 50 && boxPos.X == playerPos.X)
+                nextPos.X = playerPos.X;
+                nextPos.Y = playerPos.Y + 50;
+                nextPosBox.X = boxPos.X;
+                nextPosBox.Y = boxPos.Y + 50;
+                playSound();
+
+                if (gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall && playerPos.Y < (height - 2) * 50)
                 {
-                    if (gameboard[level, (int)(playerPos.Y / 50) + 2, (int)(playerPos.X / 50)] == space || gameboard[level, (int)(playerPos.Y / 50) + 2, (int)(playerPos.X / 50)] == target)
+                    if (boxPos.Y == playerPos.Y + 50 && boxPos.X == playerPos.X)
                     {
-                        boxPos.Y = boxPos.Y + 50;
+                        if (gameboard[level, (int)(playerPos.Y / 50) + 2, (int)(playerPos.X / 50)] == space || gameboard[level, (int)(playerPos.Y / 50) + 2, (int)(playerPos.X / 50)] == target)
+                        {
+                            boxPos.Y = boxPos.Y + 50;
+                        }
+                        else
+                            playerPos.Y = playerPos.Y - 50;
                     }
-                    else
-                        playerPos.Y = playerPos.Y - 50;
-                }
-                playerPos.Y = playerPos.Y + 50;
-                isDownPressed = true;
+                    playerPos.Y = playerPos.Y + 50;
+                    isDownPressed = true;
+                }    
             }
 
             if (Keyboard.GetState().IsKeyUp(Keys.Down))
@@ -185,19 +241,29 @@ namespace Sokoban
                 }
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Up) && playerPos.Y > 50 && gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall && isUpPressed == false)
+            //up
+            if (Keyboard.GetState().IsKeyDown(Keys.Up) && isUpPressed == false)
             {
-                if (boxPos.Y == playerPos.Y - 50 && boxPos.X == playerPos.X)
+                nextPos.X = playerPos.X;
+                nextPos.Y = playerPos.Y - 50;
+                nextPosBox.X = boxPos.X;
+                nextPosBox.Y = boxPos.Y - 50;
+                playSound();
+
+                if (gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50)] != wall && playerPos.Y > 50)
                 {
-                    if (gameboard[level, (int)(playerPos.Y / 50) - 2, (int)(playerPos.X / 50)] == space || gameboard[level, (int)(playerPos.Y / 50) - 2, (int)(playerPos.X / 50)] == target)
+                    if (boxPos.Y == playerPos.Y - 50 && boxPos.X == playerPos.X)
                     {
-                        boxPos.Y = boxPos.Y - 50;
+                        if (gameboard[level, (int)(playerPos.Y / 50) - 2, (int)(playerPos.X / 50)] == space || gameboard[level, (int)(playerPos.Y / 50) - 2, (int)(playerPos.X / 50)] == target)
+                        {
+                            boxPos.Y = boxPos.Y - 50;
+                        }
+                        else
+                            playerPos.Y = playerPos.Y + 50;
                     }
-                    else
-                        playerPos.Y = playerPos.Y + 50;
-                }
-                playerPos.Y = playerPos.Y - 50;
-                isUpPressed = true;
+                    playerPos.Y = playerPos.Y - 50;
+                    isUpPressed = true;
+                } 
             }
 
             if (Keyboard.GetState().IsKeyUp(Keys.Up))
