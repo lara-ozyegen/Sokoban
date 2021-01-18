@@ -17,8 +17,8 @@ namespace Sokoban
         Vector2 nextPos;
         Vector2 nextPosBox;
         const int levelSize = 20;
-        const int width = 8;
-        const int height = 8;
+        const int width = 6;
+        const int height = 6;
         int[,,] gameboard = new int [levelSize, height, width];
         int level = 0;
         int space = 0;
@@ -26,17 +26,19 @@ namespace Sokoban
         int wall = 2;
         int player = 3;
         int target = 4;
+        int corner = 5;
         bool isLeftPressed = false;
         bool isRightPressed = false;
         bool isUpPressed = false;
         bool isDownPressed = false;
+        bool winLose;
 
         List<SoundEffect> sounds;
 
         const string winMessage = "WIN!";
         const string gameOverMessage = "GAME OVER!";
 
-
+        
      
         public Game1()
         {
@@ -57,6 +59,8 @@ namespace Sokoban
                 boxPos = new Vector2(50 * 3, 50 * 3);
             }
 
+            winLose = false;
+
             base.Initialize();
         }
 
@@ -76,15 +80,17 @@ namespace Sokoban
                 gameboard[0, i, width - 1] = wall;
             }
 
-            gameboard[0, 1, 6] = target;
+            gameboard[0, 2, 4] = target;
+            gameboard[0, 1, 1] = corner;
+            gameboard[0, height-2, width-2] = corner;
+            gameboard[0, height-2, 1] = corner;
+            gameboard[0, 1, width-2 ] = corner;
 
             //Adding the sound effects
-            sounds.Add(Content.Load<SoundEffect>("BoxHitsWall"));
-            
+            sounds.Add(Content.Load<SoundEffect>("BoxHitsWall")); 
             sounds.Add(Content.Load<SoundEffect>("WinClaps"));
             sounds.Add(Content.Load<SoundEffect>("Footsteps"));
             sounds.Add(Content.Load<SoundEffect>("OnTarget"));
-            //sounds.Add(Content.Load<SoundEffect>("GameOver"));
             sounds.Add(Content.Load<SoundEffect>("TaDa"));
             //sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall1"));
             //sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall2"));
@@ -93,45 +99,64 @@ namespace Sokoban
             sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall5"));
             sounds.Add(Content.Load<SoundEffect>("PlayerHitsWall6"));*/
             sounds.Add(Content.Load<SoundEffect>("BoxSlide"));
-
+            sounds.Add(Content.Load<SoundEffect>("GameOver"));
         }
 
         public void playSound()
         {
-            
-            //walk
-            if (gameboard[level, (int) (nextPos.Y / 50), (int)(nextPos.X / 50)] == space)
+            if (!winLose)
             {
-                sounds[2].CreateInstance().Play();
-            }
-
-            //player hits the wall
-            if (gameboard[level, (int) (nextPos.Y / 50), (int) (nextPos.X / 50)] == wall)
-            {
-                //Random rand = new Random();
-                //int num = rand.Next(1, 7);
-                //sounds[num+5].CreateInstance().Play();
-                sounds[5].CreateInstance().Play();
-            }
-
-            if (nextPos.X == boxPos.X && nextPos.Y == boxPos.Y)
-            {
-                //player slides the box if it is possible for the box to slide in that direction
-                if (gameboard[level, (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50)] == space)
+                //walk
+                if (gameboard[level, (int)(nextPos.Y / 50), (int)(nextPos.X / 50)] == space || gameboard[level, (int)(nextPos.Y / 50), (int)(nextPos.X / 50)] == corner)
                 {
-                    sounds[6].CreateInstance().Play();
+                    sounds[2].CreateInstance().Play();
                 }
 
-                //box hits the wall
-                if (gameboard[level, (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50)] == wall)
+                //player hits the wall
+                if (gameboard[level, (int)(nextPos.Y / 50), (int)(nextPos.X / 50)] == wall)
                 {
-                    sounds[0].CreateInstance().Play();
+                    sounds[5].CreateInstance().Play();
                 }
 
-                //box is at the target
-                if (gameboard[level, (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50)] == target)
+                if (nextPos.X == boxPos.X && nextPos.Y == boxPos.Y)
                 {
-                    sounds[3].CreateInstance().Play();
+                    //player slides the box if it is possible for the box to slide in that direction
+                    if (gameboard[level, (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50)] == space)
+                    {
+                        sounds[6].CreateInstance().Play();
+                    }
+
+                    //box hits the wall
+                    if (gameboard[level, (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50)] == wall)
+                    {
+                        sounds[0].CreateInstance().Play();
+                    }
+
+                    //box is at the target
+                    if (gameboard[level, (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50)] == target)
+                    {
+                        sounds[3].CreateInstance().Play();
+                        sounds[1].CreateInstance().Play();
+                        winLose = true;
+                    }
+
+                    /*if (nextPosBox.X > 50 && nextPosBox.X < 50 * (width-2) && nextPosBox.Y > 50 && nextPosBox.Y < 50 * (height-2))
+                    {
+                        //if the game is over
+                        if (gameboard[level, (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50) + 1] == wall && gameboard[level, (int)(nextPosBox.Y / 50) + 1,
+                            (int)(nextPosBox.X / 50)] == wall || gameboard[level, (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50) + 1] == wall
+                            && gameboard[level, (int)(nextPosBox.Y / 50) - 1, (int)(nextPosBox.X / 50)] == wall || gameboard[level, (int)(nextPosBox.Y / 50),
+                            (int)(nextPosBox.X / 50) - 1] == wall && gameboard[level, (int)(nextPosBox.Y / 50) + 1, (int)(nextPosBox.X / 50)] == wall || gameboard[level,
+                            (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50) - 1] == wall && gameboard[level, (int)(nextPosBox.Y / 50) - 1, (int)(nextPosBox.X / 50)] == wall)
+                        {
+                            sounds[7].CreateInstance().Play();
+                            winLose = true;
+                        }
+                    }*/
+                    if (gameboard[level, (int)(nextPosBox.Y / 50), (int)(nextPosBox.X / 50)] == corner) { 
+                        sounds[7].CreateInstance().Play();
+                        winLose = true;
+                    }
                 }
             }
         }
@@ -142,7 +167,7 @@ namespace Sokoban
                 Exit();
 
             //left
-            if (Keyboard.GetState().IsKeyDown(Keys.Left) && isLeftPressed == false)
+            if (Keyboard.GetState().IsKeyDown(Keys.Left) && isLeftPressed == false && !winLose)
             {
                 nextPos.X = playerPos.X  - 50;
                 nextPos.Y = playerPos.Y;
@@ -154,16 +179,19 @@ namespace Sokoban
                 {
                     if (boxPos.X == playerPos.X - 50 && boxPos.Y == playerPos.Y)
                     {
-                        if (gameboard[level, (int) (playerPos.Y / 50), (int) (playerPos.X / 50) - 2] == space || gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) - 2] == target)
+                        if (gameboard[level, (int) (playerPos.Y / 50), (int) (playerPos.X / 50) - 2] == space || gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) - 2] == target || gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) - 2] == corner)
                         {
                             boxPos.X = boxPos.X - 50;
                         }
                         else
                             playerPos.X = playerPos.X + 50;
+                        
+                        
                     }
                     playerPos.X = playerPos.X - 50;
                     isLeftPressed = true;
                 }
+                
             }
 
             if (Keyboard.GetState().IsKeyUp(Keys.Left))
@@ -175,7 +203,7 @@ namespace Sokoban
             }
 
             //right
-            if (Keyboard.GetState().IsKeyDown(Keys.Right) && isRightPressed == false)
+            if (Keyboard.GetState().IsKeyDown(Keys.Right) && isRightPressed == false && !winLose)
             {
                 nextPos.X = playerPos.X + 50;
                 nextPos.Y = playerPos.Y;
@@ -187,17 +215,18 @@ namespace Sokoban
                 {
                     if (boxPos.X == playerPos.X + 50 && boxPos.Y == playerPos.Y)
                     {
-                        if (gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == space || gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == target)
+                        if (gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == space || gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == target || gameboard[level, (int)(playerPos.Y / 50), (int)(playerPos.X / 50) + 2] == corner)
                         {
                             boxPos.X = boxPos.X + 50;
                         }
                         else
                             playerPos.X = playerPos.X - 50;
+                        
                     }
                     playerPos.X = playerPos.X + 50;
                     isRightPressed = true;
                 }
-               
+                
             }
 
             if (Keyboard.GetState().IsKeyUp(Keys.Right))
@@ -209,7 +238,7 @@ namespace Sokoban
             }
 
             //down
-            if (Keyboard.GetState().IsKeyDown(Keys.Down) &&  isDownPressed == false)
+            if (Keyboard.GetState().IsKeyDown(Keys.Down) &&  isDownPressed == false && !winLose)
             {
                 nextPos.X = playerPos.X;
                 nextPos.Y = playerPos.Y + 50;
@@ -221,7 +250,7 @@ namespace Sokoban
                 {
                     if (boxPos.Y == playerPos.Y + 50 && boxPos.X == playerPos.X)
                     {
-                        if (gameboard[level, (int)(playerPos.Y / 50) + 2, (int)(playerPos.X / 50)] == space || gameboard[level, (int)(playerPos.Y / 50) + 2, (int)(playerPos.X / 50)] == target)
+                        if (gameboard[level, (int)(playerPos.Y / 50) + 2, (int)(playerPos.X / 50)] == space || gameboard[level, (int)(playerPos.Y / 50) + 2, (int)(playerPos.X / 50)] == target || gameboard[level, (int)(playerPos.Y / 50) + 2, (int)(playerPos.X / 50)] == corner)
                         {
                             boxPos.Y = boxPos.Y + 50;
                         }
@@ -230,7 +259,7 @@ namespace Sokoban
                     }
                     playerPos.Y = playerPos.Y + 50;
                     isDownPressed = true;
-                }    
+                }
             }
 
             if (Keyboard.GetState().IsKeyUp(Keys.Down))
@@ -242,7 +271,7 @@ namespace Sokoban
             }
 
             //up
-            if (Keyboard.GetState().IsKeyDown(Keys.Up) && isUpPressed == false)
+            if (Keyboard.GetState().IsKeyDown(Keys.Up) && isUpPressed == false && !winLose)
             {
                 nextPos.X = playerPos.X;
                 nextPos.Y = playerPos.Y - 50;
@@ -254,7 +283,7 @@ namespace Sokoban
                 {
                     if (boxPos.Y == playerPos.Y - 50 && boxPos.X == playerPos.X)
                     {
-                        if (gameboard[level, (int)(playerPos.Y / 50) - 2, (int)(playerPos.X / 50)] == space || gameboard[level, (int)(playerPos.Y / 50) - 2, (int)(playerPos.X / 50)] == target)
+                        if (gameboard[level, (int)(playerPos.Y / 50) - 2, (int)(playerPos.X / 50)] == space || gameboard[level, (int)(playerPos.Y / 50) - 2, (int)(playerPos.X / 50)] == target || gameboard[level, (int)(playerPos.Y / 50) - 2, (int)(playerPos.X / 50)] == corner)
                         {
                             boxPos.Y = boxPos.Y - 50;
                         }
@@ -263,7 +292,7 @@ namespace Sokoban
                     }
                     playerPos.Y = playerPos.Y - 50;
                     isUpPressed = true;
-                } 
+                }
             }
 
             if (Keyboard.GetState().IsKeyUp(Keys.Up))
@@ -273,6 +302,12 @@ namespace Sokoban
                     isUpPressed = false;
                 }
             }
+
+            if(Keyboard.GetState().IsKeyDown(Keys.Enter))
+            {
+                Initialize();
+            }
+
 
 
             base.Update(gameTime);
@@ -296,7 +331,15 @@ namespace Sokoban
                             SpriteFont font;
                             font = Content.Load<SpriteFont>("File");
                             _spriteBatch.DrawString(font, winMessage, new Vector2(100,100), Color.Red);
-                            break;
+                        }
+                        //game over message
+                        /*else if (gameboard[level, (int)(boxPos.Y / 50), (int)(boxPos.X / 50) + 1] == wall && gameboard[level, (int)(boxPos.Y / 50) + 1, (int)(boxPos.X / 50)] == wall || gameboard[level, (int)(boxPos.Y / 50), (int)(boxPos.X / 50) + 1] == wall && gameboard[level, (int)(boxPos.Y / 50) - 1, (int)(boxPos.X / 50)] == wall || gameboard[level, (int)(boxPos.Y / 50), (int)(boxPos.X / 50) - 1] == wall && gameboard[level, (int)(boxPos.Y / 50) + 1, (int)(boxPos.X / 50)] == wall || gameboard[level, (int)(boxPos.Y / 50), (int)(boxPos.X / 50) - 1] == wall && gameboard[level, (int)(boxPos.Y / 50) - 1, (int)(boxPos.X / 50)] == wall)
+                        {*/
+                        else if(gameboard[level, (int)(boxPos.Y / 50), (int)(boxPos.X / 50)] == corner)
+                        {
+                            SpriteFont font;
+                            font = Content.Load<SpriteFont>("File");
+                            _spriteBatch.DrawString(font, gameOverMessage, new Vector2(100, 100), Color.Red);
                         }
                         _spriteBatch.Draw(texture, playerPos, new Rectangle((gameboard[level, y, x]) * 50, 0, 50, 50), Color.White);
                         _spriteBatch.Draw(texture, boxPos, new Rectangle((gameboard[level, y, x] - 2) * 50, 0, 50, 50), Color.White);
@@ -307,7 +350,7 @@ namespace Sokoban
             }
 
             _spriteBatch.End();
-
+           
             base.Draw(gameTime);
         }
     }
